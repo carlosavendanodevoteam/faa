@@ -25,13 +25,43 @@ persist_with: project_training_looker_faa_default_datagroup
 # Typically, join parameters require that you define the join type, join relationship, and a sql_on clause.
 # Each joined view also needs to define a primary key.
 
-explore: flights {}
+explore: airports {
+  group_label: "FAA"
+}
 
-explore: airports {}
+explore: flights {
+  group_label: "FAA"
+  description: "Start here for information about flights!"
+  join: carriers {
+    type: left_outer
+    sql_on: ${flights.carrier} = ${carriers.code} ;;
+    relationship: many_to_one
+  }
 
-explore: aircraft_models {}
+  join: aircraft {
+    type: left_outer
+    sql_on: ${flights.tail_num} = ${aircraft.tail_num} ;;
+    relationship: many_to_one
+  }
 
-explore: carriers {}
+  join: aircraft_origin {
+    from: airports
+    type: left_outer
+    sql_on: ${flights.origin} = ${aircraft_origin.code} ;;
+    relationship: many_to_one
+    fields: [full_name, city, state, code]
+  }
 
-explore: aircraft {}
+  join: aircraft_destination {
+    from: airports
+    type: left_outer
+    sql_on: ${flights.destination} = ${aircraft_destination.code} ;;
+    relationship: many_to_one
+    fields: [full_name, city, state, code]
+  }
 
+  join: aircraft_models {
+    sql_on: ${aircraft.aircraft_model_code} = ${aircraft_models.aircraft_model_code} ;;
+    relationship: many_to_one
+  }
+}
